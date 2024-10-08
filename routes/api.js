@@ -38,8 +38,9 @@ module.exports = function (app) {
       }
     })
     
-    .delete(function(req, res){
-      //if successful response will be 'complete delete successful'
+    .delete(async (req, res) => {
+      const books = await Book.deleteMany({});
+      res.json('complete delete successful');
     });
 
 
@@ -68,6 +69,7 @@ module.exports = function (app) {
       try {
         const book = await Book.findById({ _id: bookid });
         book.comments.push(comment);
+        book.commentcount = book.comments.length;
         await book.save();
         res.json({
           title: book.title,
@@ -80,9 +82,14 @@ module.exports = function (app) {
       }
     })
     
-    .delete(function(req, res){
+    .delete(async (req, res) => {
       let bookid = req.params.id;
-      //if successful response will be 'delete successful'
+      const book = await Book.findByIdAndDelete({ _id: req.params.id });
+      if (!book) {
+        return res.json('no book exists');
+      } else {
+        return res.json('delete successful');
+      }
     });
   
 };
