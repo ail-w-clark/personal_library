@@ -36,8 +36,7 @@ chai.use(chaiHttp);
 //   */
 
   suite('Routing tests', function() {
-
-
+    let bookId = '';
     suite('POST /api/books with title => create book object/expect book object', () => {
       
       test('Test POST /api/books with title', (done) => {
@@ -47,10 +46,11 @@ chai.use(chaiHttp);
           .send({ title: 'The Alchemist '})
           .end((err, res) => {
             assert.equal(res.status, 200);
-            assert.isObject(res.body, 'response should be an object');
+            assert.isObject(res.body, 'Response should be an object');
             assert.property(res.body, 'commentcount', 'Book should contain commentcount');
             assert.property(res.body, 'title', 'Book should contain title');
             assert.property(res.body, '_id', 'Book should contain _id');
+            bookId = res.body._id;
             done();
           });
       });
@@ -63,7 +63,7 @@ chai.use(chaiHttp);
           .get('/api/books')
           .end((err, res) => {
             assert.equal(res.status, 200);
-            assert.isArray(res.body, 'response should be an array');
+            assert.isArray(res.body, 'Response should be an array');
             assert.property(res.body[0], 'commentcount', 'Books in array should contain commentcount');
             assert.property(res.body[0], 'title', 'Books in array should contain title');
             assert.property(res.body[0], '_id', 'Books in array should contain _id');
@@ -74,17 +74,33 @@ chai.use(chaiHttp);
     });
 
 
-//     suite('GET /api/books/[id] => book object with [id]', function(){
+    suite('GET /api/books/[id] => book object with [id]', () => {
       
-//       test('Test GET /api/books/[id] with id not in db',  function(done){
-//         //done();
-//       });
+      test('Test GET /api/books/[id] with id not in db',  (done) => {
+        chai
+          .request(server)
+          .get('/api/books/6705735a4577ffd6b4de7abc')
+          .end((err, res) => {
+            assert.equal(res.status, 200);
+            assert.isString(res.body, 'Response should be a string');
+            done();
+          });
+      });
       
-//       test('Test GET /api/books/[id] with valid id in db',  function(done){
-//         //done();
-//       });
+      test('Test GET /api/books/[id] with valid id in db',  function(done){
+        chai
+          .request(server)
+          .get(`/api/books/${bookId}`)
+          .end((err, res) => {
+            assert.equal(res.status, 200);
+            assert.isObject(res.body, 'Response should be an object');
+            assert.property(res.body, '_id', 'Book should contain _id');
+            assert.property(res.body, 'comments', 'Book should contain comments');
+            done();
+          });
+      });
       
-//     });
+    });
 
 
 //     suite('POST /api/books/[id] => add comment/expect book object with id', function(){

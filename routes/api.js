@@ -18,28 +18,25 @@ const bookSchema = new mongoose.Schema({
 
 const Book = mongoose.model('Book', bookSchema);
 
-const addBook = (req, res) => {
-  const { title } = req.body;
-
-  if (!title) {
-    return res.json('missing required field title')
-  } else {
-    const newBook = new Book({ title: title });
-    newBook.save();
-    res.json(newBook);
-  }
-};
-
-const getBooks = async (req, res) => {
-  const books = await Book.find({});
-  res.json(books);
-}
-
 module.exports = function (app) {
 
   app.route('/api/books')
-    .get(getBooks)
-    .post(addBook)
+    .get(async (req, res) => {
+      const books = await Book.find({});
+      res.json(books);
+    })
+
+    .post((req, res) => {
+      const { title } = req.body;
+    
+      if (!title) {
+        return res.json('missing required field title')
+      } else {
+        const newBook = new Book({ title: title });
+        newBook.save();
+        res.json(newBook);
+      }
+    })
     
     .delete(function(req, res){
       //if successful response will be 'complete delete successful'
@@ -48,9 +45,18 @@ module.exports = function (app) {
 
 
   app.route('/api/books/:id')
-    .get(function (req, res){
+    .get(async (req, res) => {
       let bookid = req.params.id;
-      //json res format: {"_id": bookid, "title": book_title, "comments": [comment,comment,...]}
+      const book = await Book.findById({ _id: req.params.id });
+      if (!book) {
+        return res.json('no book exists');
+      } else {
+        res.json({
+          title: book.title,
+          _id: req.params.id,
+          comments: book.comments
+        });
+      }
     })
     
     .post(function(req, res){
