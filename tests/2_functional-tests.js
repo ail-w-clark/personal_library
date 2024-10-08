@@ -103,21 +103,47 @@ chai.use(chaiHttp);
     });
 
 
-//     suite('POST /api/books/[id] => add comment/expect book object with id', function(){
+    suite('POST /api/books/[id] => add comment/expect book object with id', () => {
       
-//       test('Test POST /api/books/[id] with comment', function(done){
-//         //done();
-//       });
+      test('Test POST /api/books/[id] with comment', (done) => {
+        chai
+          .request(server)
+          .post(`/api/books/${bookId}`)
+          .send({ comment: 'very interesting' })
+          .end((err, res) => {
+            assert.equal(res.status, 200);
+            assert.isObject(res.body, 'Response should be an object');
+            assert.property(res.body, 'title', 'Response should contain title');
+            assert.property(res.body, '_id', 'Response should include _id');
+            assert.property(res.body, 'comments', 'Response should include comments');
+            assert.isArray(res.body.comments, 'Comments should be an array');
+            done();
+          })
+      });
 
-//       test('Test POST /api/books/[id] without comment field', function(done){
-//         //done();
-//       });
+      test('Test POST /api/books/[id] without comment field', function(done){
+        chai
+          .request(server)
+          .post(`/api/books/${bookId}`)
+          .end((err, res) => {
+            assert.equal(res.status, 200);
+            assert.isString(res.body, 'Response should be a string');
+            done();
+          })
+      });
 
-//       test('Test POST /api/books/[id] with comment, id not in db', function(done){
-//         //done();
-//       });
-      
-//     });
+      test('Test POST /api/books/[id] with comment, id not in db', function(done){
+        chai
+          .request(server)
+          .post('/api/books/6705735a4577ffd6b4de7abc')
+          .send({ comment: 'my favorite book' })
+          .end((err, res) => {
+            assert.equal(res.status, 200);
+            assert.isString(res.body, 'Response should be a string');
+            done();
+          });
+      });
+    });
 
 //     suite('DELETE /api/books/[id] => delete book object id', function() {
 

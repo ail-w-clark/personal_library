@@ -59,10 +59,25 @@ module.exports = function (app) {
       }
     })
     
-    .post(function(req, res){
+    .post(async (req, res) => {
       let bookid = req.params.id;
       let comment = req.body.comment;
-      //json res format same as .get
+      if (!comment) {
+        return res.json('missing required field comment');
+      }
+      try {
+        const book = await Book.findById({ _id: bookid });
+        book.comments.push(comment);
+        await book.save();
+        res.json({
+          title: book.title,
+          _id: bookid,
+          comments: book.comments
+        });
+      } 
+      catch {
+        return res.json('no book exists')
+      }
     })
     
     .delete(function(req, res){
