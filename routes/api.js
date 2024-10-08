@@ -27,18 +27,18 @@ const addBook = (req, res) => {
     const newBook = new Book({ title: title });
     newBook.save();
     res.json(newBook);
-    console.log(newBook);
   }
 };
+
+const getBooks = async (req, res) => {
+  const books = await Book.find({});
+  res.json(books);
+}
 
 module.exports = function (app) {
 
   app.route('/api/books')
-    .get(function (req, res){
-      //response will be array of book objects
-      //json res format: [{"_id": bookid, "title": book_title, "commentcount": num_of_comments },...]
-    })
-    
+    .get(getBooks)
     .post(addBook)
     
     .delete(function(req, res){
